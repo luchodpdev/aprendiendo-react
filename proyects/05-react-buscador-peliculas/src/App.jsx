@@ -1,5 +1,6 @@
 import './App.css'
 import { Movies } from './components/Movies.jsx'
+import { SortBy } from './components/SortBy.jsx'
 import { useMovies } from './hooks/useMovies.js'
 import { useEffect, useState, useRef } from 'react'
 
@@ -37,8 +38,9 @@ function useSearch () {
 }
 
 function App() {
+  const [sort, setSort] = useState(false)
   const { search, updateSearch, error } = useSearch()
-  const { movies, getMovies } = useMovies({ search })
+  const { movies, loading, getMovies } = useMovies({ search, sort })
 
   const handleChange = (event) => {
     updateSearch(event.target.value)
@@ -46,7 +48,11 @@ function App() {
   
   const handleSubmit = (event) => {
     event.preventDefault()
-    getMovies()
+    getMovies({ search })
+  }
+
+  const handleSort = () => {
+    setSort(!sort)
   }
 
   
@@ -58,6 +64,7 @@ function App() {
         <h1>Buscador de películas</h1>
         <form className='form' onSubmit={handleSubmit}>
           <input onChange={handleChange} value={search} name='query' placeholder='Avengers, The Matrix, Starwars' />
+          <input type='checkbox' onChange={handleSort} checked={sort} />
           <button type='submit' >Buscar</button>
         </form>
         {error && <p style={{ color: 'red', textAlign: 'center'}} >{error}</p>}
@@ -65,7 +72,9 @@ function App() {
       </header>
 
       <main>
-        <Movies movies={movies} />
+        {
+          loading ? <p>Cargando...</p> : <Movies movies={movies} />
+        }
       </main>
     </div>
   )
