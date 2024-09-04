@@ -1,46 +1,40 @@
-import { createContext, useState } from "react";
+import { useReducer, createContext } from 'react'
+import { cartReducer, cartInitialState } from '../reducers/cart.js'
 
-//1. crear contexto
 export const CartContext = createContext()
 
-//2. crear provider
-export function CartProvider({ children }) {
-    const [cart, setCart] = useState([])
+function useCartReducer () {
+  const [state, dispatch] = useReducer(cartReducer, cartInitialState)
 
-    const addToCart = product => {
-        // Check if the product is already in the cart
-        const productInCartIndex = cart.findIndex(item => item.id === product.id)
+  const addToCart = product => dispatch({
+    type: 'ADD_TO_CART',
+    payload: product
+  })
 
-        if (productInCartIndex >= 0) {
-            // una forma sería usando strcuturedCLone
-            const newCart = structuredClone(cart)
-            newCart[productInCartIndex].quantity += 1
-            return setCart(newCart)
-        }
+  const removeFromCart = product => dispatch({
+    type: 'REMOVE_FROM_CART',
+    payload: product
+  })
 
-        //Producto no esta en el carrito
-        setCart(prevState => ([
-            ...prevState,
-            {
-                ...product,
-                quantity: 1
-            }
-        ]))
-    }
+  const clearCart = () => dispatch({ type: 'CLEAR_CART' })
 
-    const clearCart = () => {
-        setCart([])
-    }
+  return { state, addToCart, removeFromCart, clearCart }
+}
 
-    return (
-        <CartContext.Provider value={{
-            cart,
-            addToCart,
-            clearCart
-        }}
-        >
-            {children}
-        </CartContext.Provider>
-        
-    )
+// la dependencia de usar React Context
+// es MÍNIMA
+export function CartProvider ({ children }) {
+  const { state, addToCart, removeFromCart, clearCart } = useCartReducer()
+
+  return (
+    <CartContext.Provider value={{
+      cart: state,
+      addToCart,
+      removeFromCart,
+      clearCart
+    }}
+    >
+      {children}
+    </CartContext.Provider>
+  )
 }
