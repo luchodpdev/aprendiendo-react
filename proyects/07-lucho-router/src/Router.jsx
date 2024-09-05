@@ -1,8 +1,9 @@
 import { EVENTS } from "./consts"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Children } from "react"
 import { match } from 'path-to-regexp'
+import { Route } from "./Route"
 
-export function Router ({ routes = [], defaultComponent: DefatulComponent = () => <h1>Error 404</h1> }) {
+export function Router ({ children, routes = [], defaultComponent: DefatulComponent = () => <h1>Error 404</h1> }) {
     const [currentPath, setCurrentPath] = useState(window.location.pathname)
   
     useEffect(() => {
@@ -21,15 +22,25 @@ export function Router ({ routes = [], defaultComponent: DefatulComponent = () =
     }, [])
 
     let routeParams = {}
+
+    // add routes from children <Route /> componentes
+    const routesFromChildren = Children.map(children, ({ props, type }) => {
+      const { name } = type
+      const isRoute = name === 'Route'
+
+      return isRoute ? props : null
+})
+
+    const routesToUse = routes.concat(routesFromChildren)
   
-    const Page = routes.find(({ path }) => {
+    const Page = routesToUse.find(({ path }) => {
        if (path === currentPath) return true
 
        // hemos usado path-to-regexp
        //para poder detectar rutas dinamicas por ejemplo
        // /search/:query <- :query es una ruta dinámica
-    const matchedUrl = match(path, { decode: decodeURIComponent })
-    const matched = matchedUrl(currentPath)
+    const matcherUrl = match(path, { decode: decodeURIComponent })
+    const matched = matcherUrl(currentPath)
     if (!matched) return false
 
     // guardar los parámetros de la url que eran dinámicos
