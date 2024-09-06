@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { Component, lazy, Suspense } from 'react'
 import './App.css'
 import { Route } from './Route.jsx'
 import { Router } from './Router.jsx'
@@ -10,6 +10,10 @@ const LazyAboutPage = lazy(() => import('./pages/About.jsx'))
 const LazyHomePage = lazy(() => import('./pages/Home.jsx'))
 
 const appRoutes = [
+  {
+    path: '/:lang/about',
+    Component: LazyAboutPage
+  },
   {
     path: '/search/:query',
     Component: SearchPage
