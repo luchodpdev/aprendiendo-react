@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { Router } from "./Router"
 import { getCurrentPath } from "./utils"
 import { Link } from "./Link"
@@ -44,8 +44,8 @@ describe('Router', () => {
 
     })
 
-    it('Should navigate using link', () => {
-        getCurrentPath.mockReturnValue('/')
+    it('Should navigate using link', async () => {
+        getCurrentPath.mockReturnValueOnce('/')
 
         render(
             <Router>
@@ -53,17 +53,20 @@ describe('Router', () => {
                     return (
                         <>
                             <h1>Home</h1>
-                            <Link to='/about'>About</Link>
+                            <Link to='/about'>Go to About</Link>
                         </>
                     )
                 }} />
-                <Route path='/about' Component={() => {<h1>About</h1>}} />
+                <Route path='/about' Component={() => <h1>About</h1>} />
             </Router>
         )
         // Click on the link
-        screen.getByText(/Go to About/).click()
+        const button = screen.getByText(/Go to About/)
+        fireEvent.click(button)
+
+        const aboutTitle = await screen.findByText('About')
 
         // Check that the new route is rendered
-        expect(screen.getByText('About')).toBeTruthy()
+        expect(aboutTitle).toBeTruthy()
     })
 })
