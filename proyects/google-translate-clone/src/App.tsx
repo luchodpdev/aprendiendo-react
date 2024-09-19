@@ -1,70 +1,49 @@
 /* eslint-disable react/react-in-jsx-scope */
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Container, Row, Col, Button } from 'react-bootstrap'
 import './App.css'
-import { useReducer } from 'react'
-import { Action, type State } from './types'
-
-// 1. Create a  initialState
-const initialState: State = {
-  fromLanguage: 'auto',
-  toLanguage: 'en',
-  fromText: '',
-  resutl: '',
-  loading: false
-}
-
-// 2. Create a reducer
-function reducer (state: State, action: Action) {
-  const { type } = action
-  if (type === 'INTERCHANGE_LANGUAGES') {
-    return {
-      ...state,
-      fromLanguage: state.toLanguage,
-      toLanguage: state.fromLanguage
-    }
-  }
-
-  if (type === 'SET_FROM_LANGUAGE') {
-    return {
-      ...state,
-      fromLanguage: action.payload
-    }
-  }
-
-  if (type === 'SET_TO_LANGUAGE') {
-    return {
-      ...state,
-      toLanguage: action.payload
-    }
-  }
-
-  if (type === 'SET_FROM_TEXT') {
-    return {
-      ...state,
-      loading: true,
-      fromText: action.payload,
-      result: ''
-    }
-  }
-
-  if (type === 'SET_RESULT') {
-    return {
-      ...state,
-      loading: false,
-      result: action.payload
-    }
-  }
-  return state
-}
+import { useStore } from './hooks/useStore'
+import { AUTO_LANGUAGE } from './constants'
+import { ArrowIcon } from './components/Icons'
+import { LanguageSelector } from './components/LanguageSelector'
 
 function App() {
-  // 3. usar el useReducer
-  const [state, dispatch] = useReducer(reducer, initialState)
+
+  const {
+    fromLanguage,
+    toLanguage,
+    interchangeLanguages,
+    setToLanguage,
+    setFromLanguage  
+  } = useStore()
+
 
   return (
-    <div className='App'>
+    <Container fluid>
       <h1>Google Translate</h1>
-    </div>
+
+      <Row>
+        <Col>
+          <LanguageSelector 
+          type='from'
+          value={fromLanguage}
+          onChange={setFromLanguage}/>
+        </Col>
+
+        <Col>
+          <Button variant='link' disabled={fromLanguage === AUTO_LANGUAGE} onClick={interchangeLanguages}>
+            <ArrowIcon />
+          </Button>
+        </Col>
+
+        <Col>
+          <LanguageSelector 
+          type='to'
+          value={toLanguage}
+          onChange={setToLanguage}/>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 
